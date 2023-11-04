@@ -1,5 +1,14 @@
 export {};
 
+declare module "express-session" {
+  interface SessionData {
+    passport: {
+      user: number;
+    };
+    messages: string[];
+  }
+}
+
 declare global {
   namespace Express {
     export interface User {
@@ -10,5 +19,4 @@ declare global {
       role: string;
     }
   }
-
 }

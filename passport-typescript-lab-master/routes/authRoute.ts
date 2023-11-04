@@ -1,14 +1,12 @@
 import express from "express";
+import session, { SessionData } from "express-session";
 import passport from "passport";
-import { forwardAuthenticated } from "../middleware/checkAuth";
+import {
+  forwardAuthenticated,
+  ensureAuthenticated,
+} from "../middleware/checkAuth";
 
 const router = express.Router();
-
-declare module "express-session" {
-  interface SessionData {
-    messages: string[];
-  }
-}
 
 router.get("/login", forwardAuthenticated, (req, res) => {
   const messages = req.session.messages || [];
@@ -48,5 +46,37 @@ router.get(
     res.redirect("/dashboard");
   }
 );
+
+router.get("/admin", ensureAuthenticated, (req, res) => {
+  let allSessions:
+    | SessionData[]
+    | { [sid: string]: SessionData }
+    | null
+    | undefined = null;
+  const getAllSessions = new Promise<void>((resolve, reject) => {
+    req.sessionStore?.all!(
+      (
+        err: any,
+        sessions:
+          | SessionData[]
+          | {
+              [sid: string]: SessionData;
+            }
+          | null
+          | undefined
+      ) => {
+        if (err) reject(err);
+        allSessions = sessions;
+        resolve();
+      }
+    );
+  });
+
+  getAllSessions.then(() => console.log(allSessions));
+
+  res.render("admin", {
+    user: req.user,
+  });
+});
 
 export default router;

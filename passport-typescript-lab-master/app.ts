@@ -1,8 +1,17 @@
 import express from "express";
 import expressLayouts from "express-ejs-layouts";
-import session from "express-session";
+import session, { SessionData } from "express-session";
 import path from "path";
-import passportMiddleware from './middleware/passportMiddleware';
+import passportMiddleware from "./middleware/passportMiddleware";
+
+declare module 'express-session' {
+  interface SessionData {
+    passport: {
+        user: number;
+    };
+    messages: string[];
+  }
+}
 
 const port = process.env.port || 8000;
 
@@ -25,6 +34,7 @@ app.use(
 
 import authRoute from "./routes/authRoute";
 import indexRoute from "./routes/indexRoute";
+import { getUserById } from "./controllers/userController";
 
 // Middleware for express
 app.use(express.json());
@@ -41,6 +51,43 @@ app.use((req, res, next) => {
 
   console.log(`Session details are: `);
   console.log((req.session as any).passport);
+
+  let allSessions: { sessionId: string; userId: number }[] = [];
+  const getAllSessions = new Promise<void>((resolve, reject) => {
+    req.sessionStore?.all!(
+      (
+        err: any,
+        sessions:
+          | SessionData[]
+          | {
+              [sid: string]: SessionData;
+            }
+          | null
+          | undefined
+      ) => {
+        if (err) reject(err);
+        if (
+          sessions &&
+          typeof sessions === "object" &&
+          !Array.isArray(sessions)
+        ) {
+          const sessionIds = Object.keys(sessions);
+          sessionIds.forEach((sessionId) => {
+            allSessions.push({
+              sessionId: sessionId,
+              userId: sessions[sessionId].passport.user,
+            });
+          });
+        }
+        resolve();
+      }
+    );
+  });
+
+  getAllSessions.then(() => {
+    console.log("*** ALL SESSIONS ***");
+    console.log(allSessions);
+  });
   next();
 });
 
