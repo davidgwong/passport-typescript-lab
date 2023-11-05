@@ -1,10 +1,21 @@
 import express from "express";
-import session, { SessionData } from "express-session";
 import passport from "passport";
 import {
   forwardAuthenticated,
   ensureAuthenticated,
 } from "../middleware/checkAuth";
+
+declare global {
+  namespace Express {
+    export interface User {
+      id: number;
+      name: string;
+      email: string;
+      password: string;
+      role: string;
+    }
+  }
+}
 
 const router = express.Router();
 
@@ -16,11 +27,15 @@ router.get("/login", forwardAuthenticated, (req, res) => {
 router.post(
   "/login",
   passport.authenticate("local", {
-    successRedirect: "/dashboard",
+    // successRedirect: "/dashboard",
     failureRedirect: "/auth/login",
     /* FIX ME: 😭 Done 😀 failureMsg needed when login fails */
     failureMessage: true,
-  })
+  }),
+  function(req, res) {
+    if(req.user?.role == "Admin") res.redirect("/admin");
+    else res.redirect("/dashboard");
+  }
 );
 
 router.get("/logout", (req, res) => {
@@ -46,37 +61,5 @@ router.get(
     res.redirect("/dashboard");
   }
 );
-
-router.get("/admin", ensureAuthenticated, (req, res) => {
-  let allSessions:
-    | SessionData[]
-    | { [sid: string]: SessionData }
-    | null
-    | undefined = null;
-  const getAllSessions = new Promise<void>((resolve, reject) => {
-    req.sessionStore?.all!(
-      (
-        err: any,
-        sessions:
-          | SessionData[]
-          | {
-              [sid: string]: SessionData;
-            }
-          | null
-          | undefined
-      ) => {
-        if (err) reject(err);
-        allSessions = sessions;
-        resolve();
-      }
-    );
-  });
-
-  getAllSessions.then(() => console.log(allSessions));
-
-  res.render("admin", {
-    user: req.user,
-  });
-});
 
 export default router;

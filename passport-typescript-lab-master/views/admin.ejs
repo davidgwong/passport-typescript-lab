@@ -1,7 +1,14 @@
 <h1 class="mt-4">Dashboard</h1>
 <p class="lead mb-3">Welcome <%= user.name %></p>
-<% if (user.role == "Admin") { %>
-  <h2>Your role is administrator.</h2>
-  <h3>Current active sessions:</h3>
+<% if (user.role != "Admin") { %>
+<p>
+  Looks like you're not an administrator. You're not supposed to be seeing this.
+</p>
 <% } %>
+<b>Current active sessions:</b><br />
+<% allSessions.forEach(session => { %>
+<b>Session ID:</b> <%= session.sessionId %><br />
+<b>User ID:</b> <%= session.userId %><br />
+<% }); %>
+
 <a href="/auth/logout" class="btn btn-secondary">Logout</a>
