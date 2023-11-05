@@ -24,7 +24,7 @@ const githubStrategy: GitHubStrategy = new GitHubStrategy(
     callbackURL: "http://localhost:8000/auth/github/callback",
   },
 
-  /* FIX ME 😭 */
+  /* FIX ME 😭 Done 😀 */
   async (
     req: any,
     accessToken: string,

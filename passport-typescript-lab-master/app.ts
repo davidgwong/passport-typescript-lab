@@ -4,10 +4,10 @@ import session, { SessionData } from "express-session";
 import path from "path";
 import passportMiddleware from "./middleware/passportMiddleware";
 
-declare module 'express-session' {
+declare module "express-session" {
   interface SessionData {
     passport: {
-        user: number;
+      user: number;
     };
     messages: string[];
   }
@@ -51,43 +51,6 @@ app.use((req, res, next) => {
 
   console.log(`Session details are: `);
   console.log((req.session as any).passport);
-
-  let allSessions: { sessionId: string; userId: number }[] = [];
-  const getAllSessions = new Promise<void>((resolve, reject) => {
-    req.sessionStore?.all!(
-      (
-        err: any,
-        sessions:
-          | SessionData[]
-          | {
-              [sid: string]: SessionData;
-            }
-          | null
-          | undefined
-      ) => {
-        if (err) reject(err);
-        if (
-          sessions &&
-          typeof sessions === "object" &&
-          !Array.isArray(sessions)
-        ) {
-          const sessionIds = Object.keys(sessions);
-          sessionIds.forEach((sessionId) => {
-            allSessions.push({
-              sessionId: sessionId,
-              userId: sessions[sessionId].passport.user,
-            });
-          });
-        }
-        resolve();
-      }
-    );
-  });
-
-  getAllSessions.then(() => {
-    console.log("*** ALL SESSIONS ***");
-    console.log(allSessions);
-  });
   next();
 });
 

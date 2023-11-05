@@ -27,7 +27,6 @@ router.get("/login", forwardAuthenticated, (req, res) => {
 router.post(
   "/login",
   passport.authenticate("local", {
-    // successRedirect: "/dashboard",
     failureRedirect: "/auth/login",
     /* FIX ME: 😭 Done 😀 failureMsg needed when login fails */
     failureMessage: true,
