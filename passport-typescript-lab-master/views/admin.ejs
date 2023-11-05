@@ -9,6 +9,7 @@
 <% allSessions.forEach(session => { %>
 <b>Session ID:</b> <%= session.sessionId %><br />
 <b>User ID:</b> <%= session.userId %><br />
+<a href="/revoke/<%= session.sessionId %>">Revoke Session</a><br>
 <% }); %>
 
 <a href="/auth/logout" class="btn btn-secondary">Logout</a>
